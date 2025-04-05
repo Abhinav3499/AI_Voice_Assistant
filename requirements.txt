@@ -1,0 +1,6 @@
+sounddevice
+scipy
+SpeechRecognition
+requests
+python-dotenv
+edge-tts
