@@ -1,39 +1,48 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, jsonify
 from audio import record_audio
 from STT import transcribe_audio_google
 from query import generate_response
 from TTS import text_to_speech
 import asyncio
+import time
 import os
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'static'
 
-@app.route("/", methods=["GET", "POST"])
+@app.after_request
+def add_header(response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+@app.route('/')
 def index():
-    transcript = ""
-    response_text = ""
-    if request.method == "POST":
-        # Step 1: Record Audio
-        audio_path = record_audio(duration=5)
+    return render_template('index.html')
 
-        # Step 2: Transcribe
-        transcript = transcribe_audio_google(audio_path)
-        if not transcript:
-            transcript = "Speech not recognized."
-            return render_template("index.html", transcript=transcript, response=response_text)
+@app.route('/process', methods=['POST'])
+def process_audio():
+    audio_file = record_audio()  
 
-        # Step 3: Generate Gemini response
-        response_text = generate_response(transcript)
-        if not response_text:
-            response_text = "Error from Gemini API."
-            return render_template("index.html", transcript=transcript, response=response_text)
+    transcript = transcribe_audio_google(audio_file)
+    if not transcript:
+        return jsonify({"error": "Could not transcribe audio"}), 500
 
-        # Step 4: TTS
-        output_path = os.path.join(app.config['UPLOAD_FOLDER'], 'output.mp3')
-        asyncio.run(text_to_speech(response_text))
-    
-    return render_template("index.html", transcript=transcript, response=response_text)
+    response_text = generate_response(transcript)
+    if not response_text:
+        return jsonify({"error": "Gemini API failed"}), 500
+
+    output_path = "static/output.mp3"
+    if os.path.exists(output_path):
+        os.remove(output_path)
+    asyncio.run(text_to_speech(response_text))
+
+    timestamp = int(time.time())  
+
+    return jsonify({
+        "response": response_text,
+        "audio_url": f"/static/output.mp3?ts={timestamp}"
+    })
 
 if __name__ == "__main__":
     app.run(debug=True)

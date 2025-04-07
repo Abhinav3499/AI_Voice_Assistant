@@ -1,27 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>AI Voice Assistant</title>
+  <meta charset="UTF-8">
+  <title>AI Voice Assistant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom animations for pulse effect */
+    @keyframes pulse {
+      0%, 100% { height: 1.5rem; }
+      50% { height: 4rem; }
+    }
+    .pulse-animation {
+      animation: pulse 1s infinite;
+    }
+    /* Floating background circles */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+  </style>
 </head>
-<body>
-    <h1>🎙️ AI Voice Assistant</h1>
-    <form method="POST">
-        <button type="submit">Start Recording</button>
-    </form>
+<body class="bg-gradient-to-br from-blue-900 to-purple-900 min-h-screen flex items-center justify-center relative overflow-hidden">
+  
+  <div class="absolute rounded-full bg-white opacity-5 w-64 h-64 top-10 left-20 animate-[float_10s_infinite_ease-in-out]"></div>
+  <div class="absolute rounded-full bg-white opacity-5 w-80 h-80 bottom-10 right-10 animate-[float_10s_infinite_ease-in-out]"></div>
+  
 
-    {% if transcript %}
-        <h3>📝 Transcript:</h3>
-        <p>{{ transcript }}</p>
-    {% endif %}
+  <div class="z-10 text-center">
+    <div id="mic-wrapper" class="mx-auto">
+      <button id="record-btn" class="bg-gradient-to-r from-indigo-500 to-purple-500 p-6 rounded-full shadow-2xl hover:scale-110 transition-transform duration-300">
+        <img src="{{ url_for('static', filename='mic.png') }}" alt="Mic" class="w-16 h-16">
+      </button>
+    </div>
+    
 
-    {% if response %}
-        <h3>🤖 Gemini Response:</h3>
-        <p>{{ response }}</p>
-        <audio controls>
-            <source src="{{ url_for('static', filename='output.mp3') }}" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
-    {% endif %}
+    <div id="wave-bars" class="flex justify-center items-end mt-6 space-x-1 opacity-0">
+      <div class="bar bg-teal-400 w-2" style="animation-delay: 0s;"></div>
+      <div class="bar bg-teal-400 w-2" style="animation-delay: 0.1s;"></div>
+      <div class="bar bg-teal-400 w-2" style="animation-delay: 0.2s;"></div>
+      <div class="bar bg-teal-400 w-2" style="animation-delay: 0.3s;"></div>
+      <div class="bar bg-teal-400 w-2" style="animation-delay: 0.4s;"></div>
+      <div class="bar bg-teal-400 w-2" style="animation-delay: 0.5s;"></div>
+      <div class="bar bg-teal-400 w-2" style="animation-delay: 0.6s;"></div>
+      <div class="bar bg-teal-400 w-2" style="animation-delay: 0.7s;"></div>
+    </div>
+    
+
+    <audio id="audioPlayer" controls class="mt-6 hidden"></audio>
+  </div>
+  
+  <script>
+    const recordBtn = document.getElementById("record-btn");
+    const audioPlayer = document.getElementById("audioPlayer");
+    const waveBars = document.getElementById("wave-bars");
+    const bars = document.querySelectorAll('.bar');
+
+    recordBtn.addEventListener("click", async () => {
+
+      waveBars.classList.remove("opacity-0");
+      bars.forEach((bar) => bar.classList.add("pulse-animation"));
+
+      const response = await fetch("/process", { method: "POST" });
+      const data = await response.json();
+
+
+      bars.forEach((bar) => bar.classList.remove("pulse-animation"));
+      waveBars.classList.add("opacity-0");
+
+      if (data.audio_url) {
+
+        const now = new Date().getTime();
+        audioPlayer.src = data.audio_url + "?t=" + now;
+        audioPlayer.classList.remove("hidden");
+        audioPlayer.play();
+      } else {
+        alert("Error generating response");
+      }
+    });
+  </script>
 </body>
 </html>

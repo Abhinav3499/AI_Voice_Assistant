@@ -5,22 +5,22 @@ from query import generate_response
 from TTS import text_to_speech
 
 def main():
-    print("=== Step 1: Recording Audio ===")
+    print("Recording Audio")
     audio_file = record_audio()  
     
-    print("\n=== Step 2: Speech-to-Text (STT) ===")
+    print("Speech-to-Text (STT)")
     transcript = transcribe_audio_google(audio_file)
     if transcript is None:
-        print("Transcription failed. Exiting.")
+        print("Transcription failed.")
         return
     
-    print("\n=== Step 3: Query Gemini ===")
+    print("Query Gemini")
     gemini_response = generate_response(transcript)
     if gemini_response is None:
-        print("Query failed. Exiting.")
+        print("Query failed.")
         return
     
-    print("\n=== Step 4: Text-to-Speech (TTS) ===")
+    print("Text-to-Speech (TTS)")
     asyncio.run(text_to_speech(gemini_response))
 
 if __name__ == "__main__":

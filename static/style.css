@@ -1,0 +1,80 @@
+body {
+    background-color: #0c0f24;
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.container {
+    text-align: center;
+    position: relative;
+}
+
+.wave-container {
+    position: relative;
+    display: inline-block;
+}
+
+#record-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    padding: 15px;
+    z-index: 2;
+    position: relative;
+}
+
+#record-btn img {
+    width: 100%;
+    height: 100%;
+}
+
+.waves {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    transform: translate(-50%, -50%);
+    gap: 4px;
+    z-index: 1;
+}
+
+.waves span {
+    display: block;
+    width: 6px;
+    height: 30px;
+    background: linear-gradient(180deg, #26c6da, #7e57c2);
+    border-radius: 3px;
+    animation: wave 1s infinite ease-in-out;
+    animation-delay: calc(var(--i) * 0.1s);
+    opacity: 0.6;
+    transform-origin: bottom center;
+}
+
+/* Individual delays */
+.waves span:nth-child(1) { --i: 1; }
+.waves span:nth-child(2) { --i: 2; }
+.waves span:nth-child(3) { --i: 3; }
+.waves span:nth-child(4) { --i: 4; }
+.waves span:nth-child(5) { --i: 5; }
+.waves span:nth-child(6) { --i: 6; }
+.waves span:nth-child(7) { --i: 7; }
+.waves span:nth-child(8) { --i: 8; }
+.waves span:nth-child(9) { --i: 9; }
+.waves span:nth-child(10){ --i: 10; }
+
+.wave-container:not(.active) .waves span {
+    animation: none;
+    opacity: 0;
+}
+
+@keyframes wave {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1.2); }
+}
