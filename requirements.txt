@@ -4,3 +4,4 @@ SpeechRecognition
 requests
 python-dotenv
 edge-tts
+Flask
